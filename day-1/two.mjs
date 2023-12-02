@@ -1,6 +1,6 @@
-import { inputTwo } from "./data/dummy.mjs";
+import { input2 as input } from "./data/dummy.mjs";
 
-const rows = inputTwo.split("\n").filter((s) => s !== "");
+const rows = input.split("\n").filter((s) => s !== "");
 
 const allowedNumbers = [
   { number: 1, string: "one" },
@@ -41,6 +41,7 @@ const sol2 = rows.reduce((prev, next) => {
   } else {
     sol = Number(numbers.at(0) + numbers.at(0));
   }
+
   return prev + sol;
 }, 0);
 
