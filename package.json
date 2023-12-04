@@ -6,9 +6,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "one": "node --watch day-2/one.mjs",
-    "two": "node --watch day-2/two.mjs"
+    "two": "node --watch day-2/two.mjs",
+    "three": "node --watch day-3/one.mjs",
+    "four": "node --watch day-4/one.mjs"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "4.17.21"
+  }
 }
