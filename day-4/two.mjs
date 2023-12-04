@@ -1,9 +1,9 @@
-import { input } from "./data/dummy.mjs";
+import { input } from "./data/real.mjs";
 
 const guessesThatAreWinning = input
   .split("\n")
   .filter((s) => s !== "")
-  .slice(0, 1)
+  // .slice(0, 2)
   .map((row) => {
     const [_, nums] = row.split(":");
     const [winningNumbers, guesses] = nums.split("|");
@@ -15,7 +15,16 @@ const guessesThatAreWinning = input
     );
     return guessesThatAreWinning.length;
   });
-//   .reduce((acc, curr) => acc + getScoreFromCorrectGuesses(Number(curr)), 0);
-console.log({
-  guessesThatAreWinning,
+
+const answer = [...guessesThatAreWinning].map((_) => 1);
+
+answer.forEach((item, answerIndex) => {
+  const correctNumbers = guessesThatAreWinning[answerIndex];
+  for (let i = 1; i < correctNumbers + 1; i++) {
+    const solIndex = i + answerIndex;
+    answer[solIndex] = answer[solIndex] + item;
+  }
 });
+
+const solution = answer.reduce((prev, next) => prev + next, 0);
+console.log({ solution });
