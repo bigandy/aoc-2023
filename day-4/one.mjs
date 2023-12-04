@@ -18,12 +18,10 @@ const guessesThatAreWinning = input
     const [winningNumbers, guesses] = nums.split("|");
     const winningArray = winningNumbers.trim().split(" ").filter(Boolean);
     const guessesArray = guesses.trim().split(" ").filter(Boolean);
-    console.log({ winningArray, guessesArray });
 
     const guessesThatAreWinning = guessesArray.filter((guess) =>
       winningArray.includes(guess)
     );
-    console.log(guessesThatAreWinning);
     return guessesThatAreWinning.length;
   })
   .reduce((acc, curr) => acc + getScoreFromCorrectGuesses(Number(curr)), 0);
