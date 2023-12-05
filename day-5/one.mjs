@@ -1,4 +1,4 @@
-import { input } from "./data/dummy.mjs";
+import { input } from "./data/real.mjs";
 
 import _ from "lodash";
 const { range } = _;
@@ -19,30 +19,32 @@ console.log({
 // Handle The Conversions
 // console.log({ rest });
 const conversions = {};
-rest.slice(0, 1).forEach((row) => {
-  const [text, ...rest] = row;
-  const conversion = text.split(" map:")[0];
-  //   console.log({ rest });
-  // console.log(rest);
-  const out = [];
-  // speed this up!
-  rest.forEach((row) => {
-    const [dest_start, source_start, rangeCount] = row
-      .split(" ")
-      .map((n) => +n);
-    console.log({ dest_start, source_start, rangeCount });
+rest
+  // .slice(0, 1)
+  .forEach((row) => {
+    const [text, ...rest] = row;
+    const conversion = text.split(" map:")[0];
+    //   console.log({ rest });
+    // console.log(rest);
+    const out = [];
+    // speed this up!
+    rest.forEach((row) => {
+      const [dest_start, source_start, rangeCount] = row
+        .split(" ")
+        .map((n) => +n);
+      console.log({ dest_start, source_start, rangeCount });
 
-    const dest_nums = range(dest_start, dest_start + rangeCount);
-    const source_nums = range(source_start, source_start + rangeCount);
+      const dest_nums = range(dest_start, dest_start + rangeCount);
+      const source_nums = range(source_start, source_start + rangeCount);
 
-    source_nums.forEach((num, index) => {
-      out[num] = dest_nums[index];
+      source_nums.forEach((num, index) => {
+        out[num] = dest_nums[index];
+      });
     });
-  });
-  //   console.log({ out });
+    //   console.log({ out });
 
-  conversions[conversion] = out;
-});
+    conversions[conversion] = out;
+  });
 console.log(conversions);
 
 // const finalLocations = Object.entries(conversions).reduce(
