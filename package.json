@@ -8,7 +8,8 @@
     "one": "node --watch day-2/one.mjs",
     "two": "node --watch day-2/two.mjs",
     "three": "node --watch day-3/one.mjs",
-    "four": "node --watch day-4/two.mjs"
+    "four": "node --watch day-4/two.mjs",
+    "five": "node --watch day-5/one.mjs"
   },
   "keywords": [],
   "author": "",
