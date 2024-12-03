@@ -8,19 +8,17 @@ const rows = input
   .filter((s) => s !== "")
   .map((s) => s.split(" "));
 
-// console.log({ rows });
-
 const numbersArray = {
-  J: "A",
-  2: "B",
-  3: "C",
-  4: "D",
-  5: "E",
-  6: "F",
-  7: "G",
-  8: "H",
-  9: "I",
-  T: "J",
+  2: "A",
+  3: "B",
+  4: "C",
+  5: "D",
+  6: "E",
+  7: "F",
+  8: "G",
+  9: "H",
+  T: "I",
+  J: "J",
   Q: "K",
   K: "L",
   A: "M",
@@ -30,7 +28,6 @@ const handToLetters = (hand) => {
   const letters = hand
     .split("")
     .map((c) => {
-      //   console.log({ a: numbersArray[c] });
       return numbersArray[c];
     })
     .join("");
@@ -62,8 +59,9 @@ const sortByScore = (a, b) => {
 };
 
 const getHandType = ({ solLength, solTotal }) => {
-  // console.log({ solLength, solTotal });
-  if (solLength === 1) {
+  if (solLength === 5) {
+    return 7; // five-of-a-kind
+  } else if (solLength === 1) {
     if (solTotal === 2) {
       return 2; // "one-pair";
     } else if (solTotal === 5) {
@@ -83,153 +81,137 @@ const getHandType = ({ solLength, solTotal }) => {
   return 1; // "high-card";
 };
 
-const answer = rows.map((row) => {
-  const hand = row[0];
-  const handLetters = hand.split("");
+const answer = rows
+  .map((row) => {
+    const hand = row[0];
+    const handLetters = hand.split("");
 
-  const cardGroupings = groupBy(handLetters);
-  const cardGroupingsWithoutJacks = groupBy(
-    handLetters.filter((l) => l !== "J")
-  );
+    const cardGroupings = groupBy(handLetters);
+    const cardGroupingsWithoutJacks = groupBy(
+      handLetters.filter((l) => l !== "J")
+    );
 
-  const jackCount = handLetters.filter((l) => l === "J").length;
+    const jackCount = handLetters.filter((l) => l.toUpperCase() === "J").length;
+    console.log({ jackCount });
+    if (jackCount === 5) {
+      return {
+        score: getHandType({ solLength: 5, solTotal: 5 }),
+        hand,
+        value: Number(row[1]),
+      };
+    } else if (jackCount > 0) {
+      const lettersInObj = Object.keys(cardGroupingsWithoutJacks);
+      const collectionsOfLetters = Object.values(cardGroupingsWithoutJacks)
+        .flat()
+        .join("");
+      // console.log({ lettersInObj, collectionsOfLetters, jackCount });
 
-  if (jackCount > 0) {
-    const lettersInObj = Object.keys(cardGroupingsWithoutJacks);
-    const collectionsOfLetters = Object.values(cardGroupingsWithoutJacks)
-      .flat()
-      .join("");
-    console.log({ lettersInObj, collectionsOfLetters, jackCount });
+      const getSolutionArray = (test, numberOfJacks, result, letters) => {
+        let answer = [];
+        const recurrsion = (test, numberOfJacks, result, letters) => {
+          // console.log({ test, numberOfJacks, result, letters });
 
-    const possibleSolutions = [];
+          if (numberOfJacks === 0) {
+            // console.log("here", result);
+            answer = result;
+            return result;
+          }
 
-    //   console.log(lettersInObj.length);
+          if (result.length === 0) {
+            for (let i = 0; i < letters.length; i++) {
+              result.push(test + letters[i]);
+            }
+            numberOfJacks--;
 
-    //   [5,T]
+            recurrsion(test, numberOfJacks, result, letters);
+          } else {
+            // console.log("Need to loop through result here", result);
+            const newResult = [];
+            for (let r = 0; r < result.length; r++) {
+              for (let i = 0; i < letters.length; i++) {
+                // result.push(test + letters[i]);
+                // console.log(result[r] + letters[i]);
+                newResult.push(result[r] + letters[i]);
+              }
+            }
 
-    //     55 == [0][0]
-    //     5T == [0][1]
-    //     T5 == [1][0]
-    //     TT == [1][1]
+            // console.log({ test, numberOfJacks, newResult, letters });
+            numberOfJacks--;
+            recurrsion(test, numberOfJacks, newResult, letters);
+          }
+        };
+        recurrsion(test, numberOfJacks, result, letters);
 
-    for (let l = 0; l < lettersInObj.length; l++) {
-      // console.log((l = lettersInObj[l]));
-      //   console.log(i, l);
-      let additionalLetters = "";
-      //   additionalLetters = lettersInObj[l] + lettersInObj[i];
+        return answer;
+      };
 
-      const firstLetter = lettersInObj[l];
+      // let lettersLength = 2;
 
-      possibleSolutions.push(collectionsOfLetters + firstLetter);
-      for (let i = 0; i < jackCount; i++) {
-        console.log(i + l);
-      }
+      const possibleCombinations = getSolutionArray(
+        collectionsOfLetters,
+        jackCount,
+        [],
+        lettersInObj
+      );
+
+      console.log({ possibleCombinations });
+
+      const possibleCominationsOutput = possibleCombinations
+        .map((combinationLetters) => {
+          const cardGroupings = groupBy(combinationLetters);
+          const sol = [];
+          Object.entries(cardGroupings)
+            .sort()
+            .filter(([key, value]) => {
+              return value.length > 1;
+            })
+            .forEach(([key, value]) => {
+              console.log(`${key}: ${value.length}`);
+              sol.push(value.length);
+            });
+
+          //     console.log({ cardGroupings });
+          const solLength = sol.length;
+          const solTotal = sol.reduce((a, b) => a + b, 0);
+          return {
+            score: getHandType({ solLength, solTotal }),
+            hand,
+            value: Number(row[1]),
+          };
+        })
+        .sort((a, b) => b.score - a.score)[0];
+
+      console.log({ row });
+
+      return possibleCominationsOutput;
+    } else {
+      const sol = [];
+
+      Object.entries(cardGroupings)
+        .sort()
+        .filter(([key, value]) => {
+          return value.length > 1;
+        })
+        .forEach(([key, value]) => {
+          // console.log(`${key}: ${value.length}`);
+          sol.push(value.length);
+        });
+
+      const solLength = sol.length;
+      const solTotal = sol.reduce((a, b) => a + b, 0);
+
+      // console.log(getHandType({ solLength, solTotal }));
+
+      return {
+        score: getHandType({ solLength, solTotal }),
+        hand,
+        value: Number(row[1]),
+      };
     }
+  })
+  .sort(sortByScore);
+// .reduce((prev, next, index) => {
+//   return prev + next.value * (index + 1);
+// }, 0);
 
-    console.log({ possibleSolutions });
-    // for jackCount > 0 need to test the other combinations with a jack,
-    // to get the best score.
-    // console.log({
-    //   cardGroupingsWithoutJacks,
-    //   hand,
-    //   jackCount,
-    // });
-
-    const obj = cardGroupingsWithoutJacks;
-    const numberOfJacks = jackCount;
-
-    const possibleCombinations = [obj];
-    // Object.values(obj).forEach((arr, index) => {
-    //   const objCopy = { ...obj };
-    //   const letter = arr[0];
-
-    //   const addedNumbers = [...new Array(numberOfJacks).fill()].map(
-    //     () => letter
-    //   );
-    //   objCopy[letter] = [...objCopy[letter], ...addedNumbers];
-    //   possibleCombinations.push(objCopy);
-    // });
-
-    // console.log({ cardGroupingsWithoutJacks });
-    //   const possibleCominationsOutput = possibleCombinations
-    //     .map((cardGroupings) => {
-    //       const sol = [];
-    //       Object.entries(cardGroupings)
-    //         .sort()
-    //         .filter(([key, value]) => {
-    //           return value.length > 1;
-    //         })
-    //         .forEach(([key, value]) => {
-    //           console.log(`${key}: ${value.length}`);
-    //           sol.push(value.length);
-    //         });
-
-    //       console.log({ sol });
-    //       const solLength = sol.length;
-    //       const solTotal = sol.reduce((a, b) => a + b, 0);
-    //       return {
-    //         score: getHandType({ solLength, solTotal }),
-    //         hand,
-    //         value: Number(row[1]),
-    //       };
-    //     })
-    //     .sort((a, b) => b.score - a.score)[0];
-
-    //   console.log({ possibleCominationsOutput });
-
-    //   return possibleCominationsOutput;
-
-    // so { '5': [ '5', '5', '5' ], T: [ 'T' ] } three of a kind
-    // with one jack
-    // can become { '5': [ '5', '5', '5', '5' ], T: [ 'T' ]} // four-of-a-kind
-    // or { '5': [ '5', '5' ], T: [ 'T', 'T' ] } // two pairs
-    // so the best is four-of-a-kind
-    // we keep that score as a max.
-  } else {
-    const sol = [];
-
-    Object.entries(cardGroupings)
-      .sort()
-      .filter(([key, value]) => {
-        return value.length > 1;
-      })
-      .forEach(([key, value]) => {
-        // console.log(`${key}: ${value.length}`);
-        sol.push(value.length);
-      });
-
-    const solLength = sol.length;
-    const solTotal = sol.reduce((a, b) => a + b, 0);
-
-    // //   console.log(getHandType({ solLength, solTotal }));
-
-    return {
-      score: getHandType({ solLength, solTotal }),
-      hand,
-      value: Number(row[1]),
-    };
-  }
-});
-//   .sort(sortByScore)
-//   .reduce((prev, next, index) => {
-//     // console.log({ prev, next, index });
-
-//     return prev + next.value * (index + 1);
-//   }, 0);
-
-// console.log({ answer });
-
-// so { '5': [ '5', '5', '5' ], T: [ 'T' ] } three of a kind
-// with one jack
-// can become { '5': [ '5', '5', '5', '5' ], T: [ 'T' ]} // four-of-a-kind
-// or { '5': [ '5', '5' ], T: [ 'T', 'T' ] } // two pairs
-// so the best is four-of-a-kind
-// we keep that score as a max.
-
-// console.log({ index, original, origArrLen: numberOfJacks });
-
-// const sols = [obj];
-
-// console.log({ outs });
-
-// NOT 253945077
+console.log({ answer });
